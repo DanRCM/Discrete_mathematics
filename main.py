@@ -1,4 +1,4 @@
-from view_project.view_program import root
+from view_project.view_program import window
 
 # Ejecutar la interfaz gráfica
-root.mainloop()
+window.mainloop()
