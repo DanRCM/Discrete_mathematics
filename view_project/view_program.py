@@ -57,7 +57,9 @@ import random as rd
 
 bg_color_1 = "#0B0B0C"
 bg_color_2 = "#0F1014"
-white_color = "#F6F7F9"
+bg_color_3 = "#646464"
+white_color = "#eeeff1"
+white_color_2 = "#FCFDFF"
 
 processed_message = ""
 
@@ -242,53 +244,57 @@ logo = tk.PhotoImage(file=ASSETS_PATH / "iconbitmap.gif")
 window.title("Tkinter Designer")
 
 window.geometry("862x519")
-window.configure(bg=bg_color_2)
+window.configure(bg=white_color)
 
 canvas = tk.Canvas(
     window, bg=bg_color_2, height=519, width=862,
     bd=0, highlightthickness=0, relief="ridge")
 canvas.place(x=0, y=0)
-canvas.create_rectangle(431, 0, 431 + 431, 0 + 519, fill=bg_color_1, outline="")
+canvas.create_rectangle(431, 0, 431 + 431, 0 + 519, fill=white_color, outline="")
 
-title = tk.Label(canvas,
-    text="Algoritmo de Cifrado RSA", bg=bg_color_2,
-    fg="white",justify="left", font="Poppins 22 bold")
-#title.place(x=20.0, y=90.0)
-title.place(x=20.0, y=45.0)
 #canvas.create_rectangle(25, 160, 33 + 60, 160 + 5, fill="#FCFCFC", outline="")
-canvas.create_rectangle(25, 115, 33 + 60, 115 + 5, fill="#FCFCFC", outline="")
-
-know_more = tk.Label(
-    canvas,
-    text="Haz click aquí para ver la documentación.",
-    bg="#202220", fg="white",justify="left", cursor="hand2")
-#know_more.place(x=20, y=430)
-know_more.place(x=20, y=480)
-know_more.bind('<Button-1>', goto_documentation)
+#canvas.create_rectangle(25, 115, 33 + 60, 115 + 5, fill="#FCFCFC", outline="")
 
 
 
 
+def on_focus_out(entry):
+    message_text_id.config(fg=bg_color_3)
+    label_text_id.config(fg=bg_color_3)
 
 text_box_bg = tk.PhotoImage(file=ASSETS_PATH / "TextBox_Bg.png")
 #token_entry_img = canvas.create_image(650.5, 167.5, image=text_box_bg)
 #URL_entry_img = canvas.create_image(650.5, 248.5, image=text_box_bg)
 #filePath_entry_img = canvas.create_image(650.5, 329.5, image=text_box_bg)
 
-token_entry_img = RoundedSquare(canvas, 345, 60, 10, 0, bg_color_2, bg_color_1)
-URL_entry_img = RoundedSquare(canvas, 345, 60, 10, 0, bg_color_2, bg_color_1)
-filePath_entry_img = RoundedSquare(canvas, 345, 60, 10, 0, bg_color_2, bg_color_1)
+token_entry_img = RoundedSquare(canvas, 345, 60, 10, 0, white_color_2, white_color)
+URL_entry_img = RoundedSquare(canvas, 345, 60, 10, 0, white_color_2, white_color)
+filePath_entry_img = RoundedSquare(canvas, 345, 60, 10, 0, white_color_2, white_color)
 
 token_entry_img.place(x=477.5, y=137.5)
 URL_entry_img.place(x=477.5, y=137.5+81)
 filePath_entry_img.place(x=477.5, y=137.5+81*2)
 
-entry_message = tk.Entry(bd=0, bg=bg_color_2,fg=white_color,  highlightthickness=0)
+entry_message = tk.Entry(bd=0, bg=white_color_2,fg=bg_color_1,  highlightthickness=0)
 entry_message.place(x=490.0, y=137+25, width=321.0, height=35)
 entry_message.focus()
 
-entry_label = tk.Entry(bd=0, bg=bg_color_2, fg=white_color,  highlightthickness=0)
+entry_label = tk.Entry(bd=0, bg=white_color_2, fg=bg_color_1,  highlightthickness=0)
 entry_label.place(x=490.0, y=218+25, width=321.0, height=35)
+
+entry_message.bind("<FocusIn>", lambda event: {
+    message_text_id.config(fg=bg_color_1)
+})
+entry_message.bind("<FocusOut>", lambda event: {
+    message_text_id.config(fg=bg_color_3)
+})
+
+entry_label.bind("<FocusIn>", lambda event: {
+    label_text_id.config(fg=bg_color_1)
+})
+entry_label.bind("<FocusOut>", lambda event: {
+    label_text_id.config(fg=bg_color_3)
+})
 
 
 path_picker_img = tk.PhotoImage(file=ASSETS_PATH / "path_picker.png")
@@ -316,8 +322,8 @@ path_picker_button.place(
 #    500.0, 234.5, text="Label", fill="#515486",
 #    font="Arial-BoldMT 10 bold", anchor="w")
 
-message_text_id = tk.Label(window, text="Message", bg=bg_color_2, fg="white", font="Arial-BoldMT 10 bold")
-label_text_id = tk.Label(window, text="Label", bg=bg_color_2, fg="white", font="Arial-BoldMT 10 bold")
+message_text_id = tk.Label(window, text="Message", bg=white_color_2, fg=bg_color_3, font="Arial-BoldMT 10 bold")
+label_text_id = tk.Label(window, text="Label", bg=white_color_2, fg=bg_color_3, font="Arial-BoldMT 10 bold")
 
 message_text_id.place(x=490.0, y=145.0)
 label_text_id.place(x=490.0, y=145.0 + 81)
@@ -332,12 +338,12 @@ typeSelector = tk.OptionMenu(
     window, default, *listOptions)
 typeSelector.place(x=490, y=300.5)
 typeSelector.config(
-    bg=bg_color_2,
-    fg="#515486",
+    bg=white_color_2,
+    fg=bg_color_3,
     font="Arial-BoldMT 10 bold",
     highlightthickness=0,
-    activeforeground="#686bab",
-    activebackground=bg_color_2,
+    activeforeground=bg_color_1,
+    activebackground=white_color_2,
     cursor="hand2",
     relief="flat",
     indicatoron=False,
@@ -345,11 +351,11 @@ typeSelector.config(
 #    compound=tk.RIGHT
 )
 typeSelector["menu"].config(
-    bg="#F6F7F9",
-    fg="#515486",
+    bg=white_color_2,
+    fg=bg_color_3,
     font="Arial-BoldMT 10",
-    activeforeground="#686bab",
-    activebackground="#eeeff1",
+    activeforeground=bg_color_1,
+    activebackground=white_color,
     cursor="hand2",
     relief="flat",
     borderwidth=0,
@@ -365,28 +371,28 @@ caret_down_label = tk.Label(
 caret_down_label.place(relx=0.87, rely=0.35)
 
 #default.trace("r", on_select)
-entry = tk.Entry(bd=0, bg=bg_color_2, fg=white_color,  highlightthickness=0)
+entry = tk.Entry(bd=0, bg=white_color_2, fg=bg_color_1,  highlightthickness=0)
 entry.place(x=490.0, y=299 + 25, width=321.0, height=35)
 #x=490.0, y=145.0 + 162
 
 canvas.create_text(
     623.5, 88.0, text="Enter your message.",
-    fill="#515486", font="Arial-BoldMT 22 bold")
+    fill=bg_color_2, font="Arial-BoldMT 22 bold")
 
 
 
 #ENCRYPT BUTTON
 first_button_frame = tk.Frame(window, height=50, width=120)
-first_button_frame.place(x=507, y=401)
+first_button_frame.place(x=431 + 215.5 - 60, y=401)
 
-process_btn = RoundedButton(first_button_frame, 120, 50, 20, 2, "#f68b00", bg_color_1, command=button_clicked)
+process_btn = RoundedButton(first_button_frame, 120, 50, 20, 2, "#f68b00", white_color, command=button_clicked)
 process_btn.place(x=0, y=0)
 #create_gradient(process_btn, "#f68b00", "#bc48f6", 50)
 
 encrypt_button_label = tk.Label(
     first_button_frame,
-    text='Encrypt',
-    bg='#3A7FF6', fg='white',
+    text='Process',
+    bg="#f68b00", fg='white',
     font='Arial 10 bold')
 encrypt_button_label.place(x=35, y=15)
 encrypt_button_label.bind('<Button-1>', on_encrypt)
@@ -408,17 +414,53 @@ encrypt_button_label.bind('<Button-1>', on_encrypt)
 #decrypt_button_label.place(x=35, y=15)
 #decrypt_button_label.bind('<Button-1>', on_decrypt)
 
-terminalFrame = tk.Frame(window, height=340, width=400, bg=bg_color_2)#bg="#0c1c35")
-terminalFrame.place(x=15, y=149)
+#terminalFrame = tk.Frame(window, height=340, width=400, bg=bg_color_2)#bg="#0c1c35")
+#terminalFrame.place(x=15, y=149)
+terminalFrame = RoundedSquare(canvas, 431 + 50, 519, 50, 0, bg_color_2, white_color)
+terminalFrame.place(x=-50, y=0)
+
+title1 = tk.Label(canvas,
+                 text="RSA", bg=bg_color_2,
+                 fg="white",justify="left", font="Poppins 50 bold")
+#title.place(x=20.0, y=90.0)
+title1.place(x=40.0 + 16, y=45.0)
+
+title2 = tk.Label(canvas,
+                  text="ALGORITHM", bg=bg_color_2,
+                  fg="white",justify="left", font="Poppins 20 bold")
+title2.place(x=185.0 + 16, y=82.0)
+
 our_text = [
-    "Bienvenido a la encriptadora RSA.\n",
-    "A continuación se muestra su texto encriptado:\n",
-    entry.get(),
+    #"Bienvenido a la encriptadora RSA.\n",
+    #"A continuación se muestra su texto encriptado:\n",
+    #entry.get(),
     "A continuación se muestra su texto desencriptado:\n",
-    entry.get()
+    #entry.get()
+    "--------------------\n",
+    " _____     \n",
+    "|     |\n",
+    "|    _|\n",
+    "| |\ \ \n",
+    "|_| \_\ \n",
+    "\n",
+    "\n",
+    "\n"
 ]
-terminal_text = tk.Label(terminalFrame, text='', bg=bg_color_2, fg="white", font=("DejaVu Sans Mono", int(10.0)), justify="left", wraplength=380, anchor=tk.NW, width=50, height=20)
-terminal_text.place(x=5, y=30)
+#terminal_text = tk.Label(terminalFrame, text='', bg=bg_color_2, fg="white", font=("DejaVu Sans Mono", int(10.0)), justify="left", wraplength=380, anchor=tk.NW, width=50, height=20)
+terminal_text = tk.Label(window, text='', bg=bg_color_2, fg="white", font=("DejaVu Sans Mono", int(8.0)), justify="left", wraplength=380, anchor=tk.NW, width=50, height=23)
+#terminal_text.place(x=5, y=30)
+terminal_text.place(x=33, y=160)
+
+
+know_more = tk.Label(
+    canvas,
+    text="Haz click aquí para ver la documentación.",
+    bg=bg_color_2, fg=bg_color_3,justify="left",
+    cursor="hand2"
+)
+#know_more.place(x=20, y=430)
+know_more.place(x=20, y=480)
+know_more.bind('<Button-1>', goto_documentation)
 
 
 
