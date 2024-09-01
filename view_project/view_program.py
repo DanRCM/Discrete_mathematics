@@ -1,69 +1,30 @@
-## pip install waiting
-## pip install pillow
-## pip install tkinter
-
-from tkinter import messagebox
-
-from waiting import wait
-
-import PIL.Image
-from PIL import ImageTk, Image
-import tkinter.ttk as ttk
+import time
+import webbrowser
+from pathlib import Path
 import tkinter as tk
+from tkinter import messagebox
 import random as rd
-
-import sv_ttk
-import customtkinter as ctk
-
-#from flet import *
-
+from PIL import ImageTk, Image
 from project_algorithm_RSA.key_generation import public_key, private_key
 from project_algorithm_RSA.decrypt import decrypt
 from project_algorithm_RSA.encrypt import encrypt
 
-# view_program.py
+# Constants
+ASSETS_PATH = Path(__file__).resolve().parent / "assets"
+BG_COLOR_1 = "#0B0B0C"
+BG_COLOR_2 = "#0F1014"
+BG_COLOR_3 = "#646464"
+WHITE_COLOR = "#eeeff1"
+WHITE_COLOR_2 = "#FCFDFF"
+ORANGE_COLOR = "#f68b00"
 
-import time
-import webbrowser
-import re
-import sys
-import os
-import tkinter as tk
-import tkinter.messagebox as tk1
-import tkinter.filedialog
-from pathlib import Path
-
-#import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-
-# Funciones para la interfaz gráfica
-
-isFinished = False
-
-import threading
-import queue
-
-import threading
-import tkinter as tk
-from tkinter import messagebox
-import random as rd
-
-import threading
-import tkinter as tk
-from tkinter import messagebox
-import random as rd
-
-
-bg_color_1 = "#0B0B0C"
-bg_color_2 = "#0F1014"
-bg_color_3 = "#646464"
-white_color = "#eeeff1"
-white_color_2 = "#FCFDFF"
-
+# Global Variables
 processed_message = ""
+index = 0
+current_text = ""
+our_text = []
 
-
+# Utility Functions
 def wait_until(somepredicate, timeout, period=0.25, *args, **kwargs):
     mustend = time.time() + timeout
     while time.time() < mustend:
@@ -71,116 +32,66 @@ def wait_until(somepredicate, timeout, period=0.25, *args, **kwargs):
         time.sleep(period)
     return False
 
+def start_animation():
+    global index, entry_processed
+    entry_processed.delete(0, tk.END)
+    if not index + 1 > len(our_text):
+        if not terminal_text.cget("text") == "" and index == 0:
+            terminal_text.config(text="")
+        current_text = terminal_text.cget("text")
+        terminal_text.config(text=current_text + our_text[index])
+        index += 1
+        num = rd.randint(500, 2000)
+        terminalFrame.after(num, start_animation)
+    else:
+        entry_processed.insert(0, processed_message)
+        index = 0
+
 def on_encrypt(*args):
-    global processed_message
+    global processed_message, our_text
     terminalFrame.after(1000, start_animation)
     message = entry_message.get()
     if not message:
         messagebox.showwarning("Advertencia", "Por favor ingrese un mensaje.")
         return
     processed_message = encrypt(message, public_key)
-
+    our_text = ["A continuación su mensaje encriptado: --------------------\n", "--------------------\n", " _____\n"]
 
 def on_decrypt(*args):
-    global processed_message
+    global processed_message, our_text
     terminalFrame.after(1000, start_animation)
     try:
         ciphertext = int(entry_message.get())
         processed_message = decrypt(ciphertext, private_key)
+        our_text = ["A continuación su mensaje desencriptado: --------------------\n", "--------------------\n", " _____\n"]
     except ValueError:
         messagebox.showerror("Error", "Mensaje cifrado inválido.")
 
-#move method
-index = 0
-current_text = ""
-#entry = None
-def start_animation():
-    global index
-    global entry
-    entry.delete(0, tk.END)
-    if not index + 1 > len(our_text):
-        if not terminal_text.cget("text") == "" and index == 0:
-            terminal_text.config(text="")
-            print("text in terminal_text is equal to empty")
-        current_text = terminal_text.cget("text")
-        terminal_text.config(text=current_text + our_text[index])
-        index += 1
-        num = rd.randint(500, 2000)
-        terminalFrame.after(num, start_animation)
-    elif index + 1 > len(our_text):
-        entry.insert(0, processed_message)
-        print(processed_message, ", ")
-        print(entry.get())
-        print("Button clicked 2")
-        index = 0
-        return
-    # else:
-    #     index = 0
-    #     return
-    # isFinished = True
-
 def on_select(*args):
-    if entry_message.get():
-        if default.get() == "Encrypted Message ":
-            on_encrypt()
-        else:
-            on_decrypt()
+    if default.get() == "Encrypted Message ":
+        on_encrypt()
+    else:
+        on_decrypt()
 
 def button_clicked():
     on_select()
     start_animation()
-    print("Button clicked1")
-
-# def hex_to_RGB(hex_str):
-#     """ #FFFFFF -> [255,255,255]"""
-#     #Pass 16 to the integer function for change of base
-#     return [int(hex_str[i:i+2], 16) for i in range(1,6,2)]
-
-# def get_color_gradient(c1, c2, n):
-#     """
-#     Given two hex colors, returns a color gradient
-#     with n colors.
-#     """
-#     assert n > 1
-#     c1_rgb = np.array(hex_to_RGB(c1))/255
-#     c2_rgb = np.array(hex_to_RGB(c2))/255
-#     mix_pcts = [x/(n-1) for x in range(n)]
-#     rgb_colors = [((1-mix)*c1_rgb + (mix*c2_rgb)) for mix in mix_pcts]
-#     return ["#" + "".join([format(int(round(val*255)), "02x") for val in item]) for item in rgb_colors]
-
-
-
 
 def goto_documentation(*args):
     webbrowser.open('https://docs.google.com/document/d/1GxvPILn68NUJFLwhEI8Qod8sgEZbURSJuQ-JDiqcsSg/edit?usp=sharing', new=0, autoraise=True)
 
 class RoundedButton(tk.Canvas):
     def __init__(self, parent, width, height, cornerradius, padding, color, bg, command=None):
-        tk.Canvas.__init__(self, parent, borderwidth=0, 
-            relief="flat", highlightthickness=0, bg=bg)
+        super().__init__(parent, borderwidth=0, relief="flat", highlightthickness=0, bg=bg)
         self.command = command
-
-        if cornerradius > 0.5*width:
-            print("Error: cornerradius is greater than width.")
-            return None
-
-        if cornerradius > 0.5*height:
-            print("Error: cornerradius is greater than height.")
-            return None
-
-        rad = 2*cornerradius
-        def shape():
-            self.create_polygon((padding,height-cornerradius-padding,padding,cornerradius+padding,padding+cornerradius,padding,width-padding-cornerradius,padding,width-padding,cornerradius+padding,width-padding,height-cornerradius-padding,width-padding-cornerradius,height-padding,padding+cornerradius,height-padding), fill=color, outline=color)
-            self.create_arc((padding,padding+rad,padding+rad,padding), start=90, extent=90, fill=color, outline=color)
-            self.create_arc((width-padding-rad,padding,width-padding,padding+rad), start=0, extent=90, fill=color, outline=color)
-            self.create_arc((width-padding,height-rad-padding,width-padding-rad,height-padding), start=270, extent=90, fill=color, outline=color)
-            self.create_arc((padding,height-padding-rad,padding+rad,height-padding), start=180, extent=90, fill=color, outline=color)
-
-
-        id = shape()
-        (x0,y0,x1,y1) = self.bbox("all")
-        width = (x1-x0)
-        height = (y1-y0)
+        if cornerradius > 0.5 * width or cornerradius > 0.5 * height:
+            raise ValueError("cornerradius is greater than width or height.")
+        rad = 2 * cornerradius
+        self.create_polygon((padding, height - cornerradius - padding, padding, cornerradius + padding, padding + cornerradius, padding, width - padding - cornerradius, padding, width - padding, cornerradius + padding, width - padding, height - cornerradius - padding, width - padding - cornerradius, height - padding, padding + cornerradius, height - padding), fill=color, outline=color)
+        self.create_arc((padding, padding + rad, padding + rad, padding), start=90, extent=90, fill=color, outline=color)
+        self.create_arc((width - padding - rad, padding, width - padding, padding + rad), start=0, extent=90, fill=color, outline=color)
+        self.create_arc((width - padding, height - rad - padding, width - padding - rad, height - padding), start=270, extent=90, fill=color, outline=color)
+        self.create_arc((padding, height - padding - rad, padding + rad, height - padding), start=180, extent=90, fill=color, outline=color)
         self.configure(width=width, height=height)
         self.bind("<ButtonPress-1>", self._on_press)
         self.bind("<ButtonRelease-1>", self._on_release)
@@ -193,275 +104,109 @@ class RoundedButton(tk.Canvas):
         if self.command is not None:
             self.command()
 
-
 class RoundedSquare(tk.Canvas):
     def __init__(self, parent, width, height, cornerradius, padding, color, bg):
-        tk.Canvas.__init__(self, parent, borderwidth=0,
-                           relief="flat", highlightthickness=0, bg=bg)
-
-        if cornerradius > 0.5*width:
-            print("Error: cornerradius is greater than width.")
-            return None
-
-        if cornerradius > 0.5*height:
-            print("Error: cornerradius is greater than height.")
-            return None
-
-        rad = 2*cornerradius
-        def shape():
-            self.create_polygon((padding,height-cornerradius-padding,padding,cornerradius+padding,padding+cornerradius,padding,width-padding-cornerradius,padding,width-padding,cornerradius+padding,width-padding,height-cornerradius-padding,width-padding-cornerradius,height-padding,padding+cornerradius,height-padding), fill=color, outline=color)
-            self.create_arc((padding,padding+rad,padding+rad,padding), start=90, extent=90, fill=color, outline=color)
-            self.create_arc((width-padding-rad,padding,width-padding,padding+rad), start=0, extent=90, fill=color, outline=color)
-            self.create_arc((width-padding,height-rad-padding,width-padding-rad,height-padding), start=270, extent=90, fill=color, outline=color)
-            self.create_arc((padding,height-padding-rad,padding+rad,height-padding), start=180, extent=90, fill=color, outline=color)
-
-
-        id = shape()
-        (x0,y0,x1,y1) = self.bbox("all")
-        width = (x1-x0)
-        height = (y1-y0)
+        super().__init__(parent, borderwidth=0, relief="flat", highlightthickness=0, bg=bg)
+        if cornerradius > 0.5 * width or cornerradius > 0.5 * height:
+            raise ValueError("cornerradius is greater than width or height.")
+        rad = 2 * cornerradius
+        self.create_polygon((padding, height - cornerradius - padding, padding, cornerradius + padding, padding + cornerradius, padding, width - padding - cornerradius, padding, width - padding, cornerradius + padding, width - padding, height - cornerradius - padding, width - padding - cornerradius, height - padding, padding + cornerradius, height - padding), fill=color, outline=color)
+        self.create_arc((padding, padding + rad, padding + rad, padding), start=90, extent=90, fill=color, outline=color)
+        self.create_arc((width - padding - rad, padding, width - padding, padding + rad), start=0, extent=90, fill=color, outline=color)
+        self.create_arc((width - padding, height - rad - padding, width - padding - rad, height - padding), start=270, extent=90, fill=color, outline=color)
+        self.create_arc((padding, height - padding - rad, padding + rad, height - padding), start=180, extent=90, fill=color, outline=color)
         self.configure(width=width, height=height)
-
-
-ASSETS_PATH = Path(__file__).resolve().parent / "assets"
-output_path = ""
-
 
 def make_label(master, x, y, h, w, *args, **kwargs):
     f = tk.Frame(master, height=h, width=w)
-    f.pack_propagate(0)  # don't shrink
+    f.pack_propagate(0)
     f.place(x=x, y=y)
-
     label = tk.Label(f, *args, **kwargs)
     label.pack(fill=tk.BOTH, expand=1)
-
     return label
 
-
+# GUI Setup
 window = tk.Tk()
-logo = tk.PhotoImage(file=ASSETS_PATH / "iconbitmap.gif")
-#window.call('wm', 'iconphoto', window._w, logo)
 window.title("Tkinter Designer")
-
 window.geometry("862x519")
-window.configure(bg=white_color)
-
-canvas = tk.Canvas(
-    window, bg=bg_color_2, height=519, width=862,
-    bd=0, highlightthickness=0, relief="ridge")
+window.configure(bg=WHITE_COLOR)
+canvas = tk.Canvas(window, bg=BG_COLOR_2, height=519, width=862, bd=0, highlightthickness=0, relief="ridge")
 canvas.place(x=0, y=0)
-canvas.create_rectangle(431, 0, 431 + 431, 0 + 519, fill=white_color, outline="")
+canvas.create_rectangle(431, 0, 431 + 431, 0 + 519, fill=WHITE_COLOR, outline="")
 
-#canvas.create_rectangle(25, 160, 33 + 60, 160 + 5, fill="#FCFCFC", outline="")
-#canvas.create_rectangle(25, 115, 33 + 60, 115 + 5, fill="#FCFCFC", outline="")
+# Entry Fields
+def create_rounded_entry(parent, x, y, width, height, text_var, placeholder, font, bg_color, fg_color, border_color):
+    frame = tk.Frame(parent, bg=border_color, bd=0)
+    frame.place(x=x, y=y, width=width, height=height)
+    entry = tk.Entry(frame, textvariable=text_var, bd=0, bg=bg_color, fg=fg_color, font=font, highlightthickness=0)
+    entry.place(x=2, y=2, width=width-4, height=height-4)
+    entry.insert(0, placeholder)
+    return entry
 
+message_var = tk.StringVar()
+storage_var = tk.StringVar()
+processed_var = tk.StringVar()
 
+entry_message = create_rounded_entry(window, 490, 137 + 25, 321, 35, message_var, "Message", "Arial 10", WHITE_COLOR_2, BG_COLOR_1, ORANGE_COLOR)
+entry_storage = create_rounded_entry(window, 490, 218 + 25, 321, 35, storage_var, "Storage document", "Arial 10", WHITE_COLOR_2, BG_COLOR_1, ORANGE_COLOR)
+entry_processed = create_rounded_entry(window, 490, 299 + 25, 321, 35, processed_var, "", "Arial 10", WHITE_COLOR_2, BG_COLOR_1, ORANGE_COLOR)
 
-
-def on_focus_out(entry):
-    message_text_id.config(fg=bg_color_3)
-    label_text_id.config(fg=bg_color_3)
-
-text_box_bg = tk.PhotoImage(file=ASSETS_PATH / "TextBox_Bg.png")
-#token_entry_img = canvas.create_image(650.5, 167.5, image=text_box_bg)
-#URL_entry_img = canvas.create_image(650.5, 248.5, image=text_box_bg)
-#filePath_entry_img = canvas.create_image(650.5, 329.5, image=text_box_bg)
-
-token_entry_img = RoundedSquare(canvas, 345, 60, 10, 0, white_color_2, white_color)
-URL_entry_img = RoundedSquare(canvas, 345, 60, 10, 0, white_color_2, white_color)
-filePath_entry_img = RoundedSquare(canvas, 345, 60, 10, 0, white_color_2, white_color)
-
-token_entry_img.place(x=477.5, y=137.5)
-URL_entry_img.place(x=477.5, y=137.5+81)
-filePath_entry_img.place(x=477.5, y=137.5+81*2)
-
-entry_message = tk.Entry(bd=0, bg=white_color_2,fg=bg_color_1,  highlightthickness=0)
-entry_message.place(x=490.0, y=137+25, width=321.0, height=35)
 entry_message.focus()
 
-entry_label = tk.Entry(bd=0, bg=white_color_2, fg=bg_color_1,  highlightthickness=0)
-entry_label.place(x=490.0, y=218+25, width=321.0, height=35)
+# Labels
+message_text_id = tk.Label(window, text="Message", bg=WHITE_COLOR, fg=BG_COLOR_1, font="Arial-BoldMT 10 bold")
+storage_text_id = tk.Label(window, text="Storage document", bg=WHITE_COLOR, fg=BG_COLOR_1, font="Arial-BoldMT 10 bold")
+message_text_id.place(x=490, y=137)
+storage_text_id.place(x=490, y=218)
 
-entry_message.bind("<FocusIn>", lambda event: {
-    message_text_id.config(fg=bg_color_1)
-})
-entry_message.bind("<FocusOut>", lambda event: {
-    message_text_id.config(fg=bg_color_3)
-})
+# Button with Image
+storage_button_img = Image.open(ASSETS_PATH / "path_picker.png")
+storage_button_img = storage_button_img.resize((30, 30), Image.LANCZOS)
+storage_button_img = ImageTk.PhotoImage(storage_button_img)
 
-entry_label.bind("<FocusIn>", lambda event: {
-    label_text_id.config(fg=bg_color_1)
-})
-entry_label.bind("<FocusOut>", lambda event: {
-    label_text_id.config(fg=bg_color_3)
-})
+storage_button = tk.Button(window, image=storage_button_img, bd=0, bg=WHITE_COLOR, activebackground=WHITE_COLOR, command=lambda: print("Storage button clicked"))
+storage_button.place(x=820, y=218 + 25)
 
-
-path_picker_img = tk.PhotoImage(file=ASSETS_PATH / "path_picker.png")
-path_picker_button = tk.Button(
-    image = path_picker_img,
-    text = '',
-    compound = 'center',
-    fg = 'white',
-    borderwidth = 0,
-    highlightthickness = 0,
-    #command = select_path,
-    relief = 'flat')
-
-path_picker_button.place(
-    #x = 783, y = 319,
-    x = 783, y = 238,
-    width = 24,
-    height = 22
-)
-
-#message_text_id = canvas.create_text(
-#    500.0, 156.0, text="Message ", fill="white",
-#    font="Arial-BoldMT 10 bold", anchor="w")
-#label_text_id = canvas.create_text(
-#    500.0, 234.5, text="Label", fill="#515486",
-#    font="Arial-BoldMT 10 bold", anchor="w")
-
-message_text_id = tk.Label(window, text="Message", bg=white_color_2, fg=bg_color_3, font="Arial-BoldMT 10 bold")
-label_text_id = tk.Label(window, text="Label", bg=white_color_2, fg=bg_color_3, font="Arial-BoldMT 10 bold")
-
-message_text_id.place(x=490.0, y=145.0)
-label_text_id.place(x=490.0, y=145.0 + 81)
-
-
+# Dropdown Menu
 listOptions = ["Encrypted Message ", "Decrypted Message"]
 default = tk.StringVar()
 default.set(listOptions[0])
-caret_down_img = ImageTk.PhotoImage(Image.open(ASSETS_PATH / "arrow_down.png"), size=(0, 0))
+caret_down_img = ImageTk.PhotoImage(Image.open(ASSETS_PATH / "arrow_down.png"))
 
-typeSelector = tk.OptionMenu(
-    window, default, *listOptions)
+typeSelector = tk.OptionMenu(window, default, *listOptions)
 typeSelector.place(x=490, y=300.5)
-typeSelector.config(
-    bg=white_color_2,
-    fg=bg_color_3,
-    font="Arial-BoldMT 10 bold",
-    highlightthickness=0,
-    activeforeground=bg_color_1,
-    activebackground=white_color_2,
-    cursor="hand2",
-    relief="flat",
-    indicatoron=False,
-#    image=caret_down_img,
-#    compound=tk.RIGHT
-)
-typeSelector["menu"].config(
-    bg=white_color_2,
-    fg=bg_color_3,
-    font="Arial-BoldMT 10",
-    activeforeground=bg_color_1,
-    activebackground=white_color,
-    cursor="hand2",
-    relief="flat",
-    borderwidth=0,
-    border=0
-)
-caret_down_label = tk.Label(
-    typeSelector,
-    bg="#F6F7F9",
-    fg="#515486",
-    font="Arial-BoldMT 10 bold",
-    image=caret_down_img
-)
-caret_down_label.place(relx=0.87, rely=0.35)
+typeSelector.config(bg=WHITE_COLOR_2, fg=BG_COLOR_3, font="Arial-BoldMT 10 bold", highlightthickness=0, activeforeground=BG_COLOR_1, activebackground=WHITE_COLOR_2, cursor="hand2", relief="flat", indicatoron=False)
+typeSelector["menu"].config(bg=WHITE_COLOR_2, fg=BG_COLOR_3, font="Arial-BoldMT 10", activeforeground=BG_COLOR_1, activebackground=WHITE_COLOR, cursor="hand2", relief="flat", borderwidth=0, border=0)
+caret_down_label = tk.Label(typeSelector, bg="#F6F7F9", fg="#515486", font="Arial-BoldMT 10 bold", image=caret_down_img)
+caret_down_label.place(relx=1.87, rely=0.35)
 
-#default.trace("r", on_select)
-entry = tk.Entry(bd=0, bg=white_color_2, fg=bg_color_1,  highlightthickness=0)
-entry.place(x=490.0, y=299 + 25, width=321.0, height=35)
-#x=490.0, y=145.0 + 162
+# Title
+canvas.create_text(623.5, 88.0, text="Enter your message.", fill=BG_COLOR_2, font="Arial-BoldMT 22 bold")
 
-canvas.create_text(
-    623.5, 88.0, text="Enter your message.",
-    fill=bg_color_2, font="Arial-BoldMT 22 bold")
-
-
-
-#ENCRYPT BUTTON
+# Process Button
 first_button_frame = tk.Frame(window, height=50, width=120)
 first_button_frame.place(x=431 + 215.5 - 60, y=401)
-
-process_btn = RoundedButton(first_button_frame, 120, 50, 20, 2, "#f68b00", white_color, command=button_clicked)
+process_btn = RoundedButton(first_button_frame, 120, 50, 20, 2, ORANGE_COLOR, WHITE_COLOR, command=button_clicked)
 process_btn.place(x=0, y=0)
-#create_gradient(process_btn, "#f68b00", "#bc48f6", 50)
-
-encrypt_button_label = tk.Label(
-    first_button_frame,
-    text='Process',
-    bg="#f68b00", fg='white',
-    font='Arial 10 bold')
+encrypt_button_label = tk.Label(first_button_frame, text='Process', bg=ORANGE_COLOR, fg='white', font='Arial 10 bold')
 encrypt_button_label.place(x=35, y=15)
 encrypt_button_label.bind('<Button-1>', on_encrypt)
 
-
-
-#DECRYPT BUTTON
-#second_button_frame = tk.Frame(window, bg='red', height=50, width=120)
-#second_button_frame.place(x=667, y=401)
-
-#decrypt_btn = RoundedButton(second_button_frame, 120, 50, 20, 2, '#3A7FF6', 'white', command=on_decrypt)
-#decrypt_btn.place(x=0, y=0)
-
-#decrypt_button_label = tk.Label(
-#    second_button_frame,
-#    text='Decrypt',
-#    bg='#3A7FF6', fg='white',
-#    font='Arial 10 bold')
-#decrypt_button_label.place(x=35, y=15)
-#decrypt_button_label.bind('<Button-1>', on_decrypt)
-
-#terminalFrame = tk.Frame(window, height=340, width=400, bg=bg_color_2)#bg="#0c1c35")
-#terminalFrame.place(x=15, y=149)
-terminalFrame = RoundedSquare(canvas, 431 + 50, 519, 50, 0, bg_color_2, white_color)
+# Terminal Frame
+terminalFrame = RoundedSquare(canvas, 431 + 50, 519, 50, 0, BG_COLOR_2, WHITE_COLOR)
 terminalFrame.place(x=-50, y=0)
-
-title1 = tk.Label(canvas,
-                 text="RSA", bg=bg_color_2,
-                 fg="white",justify="left", font="Poppins 50 bold")
-#title.place(x=20.0, y=90.0)
+title1 = tk.Label(canvas, text="RSA", bg=BG_COLOR_2, fg="white", justify="left", font="Poppins 50 bold")
 title1.place(x=40.0 + 16, y=45.0)
-
-title2 = tk.Label(canvas,
-                  text="ALGORITHM", bg=bg_color_2,
-                  fg="white",justify="left", font="Poppins 20 bold")
+title2 = tk.Label(canvas, text="ALGORITHM", bg=BG_COLOR_2, fg="white", justify="left", font="Poppins 20 bold")
 title2.place(x=185.0 + 16, y=82.0)
 
-our_text = [
-    #"Bienvenido a la encriptadora RSA.\n",
-    #"A continuación se muestra su texto encriptado:\n",
-    #entry.get(),
-    "A continuación se muestra su texto desencriptado:\n",
-    #entry.get()
-    "--------------------\n",
-    " _____     \n",
-    "|     |\n",
-    "|    _|\n",
-    "| |\ \ \n",
-    "|_| \_\ \n",
-    "\n",
-    "\n",
-    "\n"
-]
-#terminal_text = tk.Label(terminalFrame, text='', bg=bg_color_2, fg="white", font=("DejaVu Sans Mono", int(10.0)), justify="left", wraplength=380, anchor=tk.NW, width=50, height=20)
-terminal_text = tk.Label(window, text='', bg=bg_color_2, fg="white", font=("DejaVu Sans Mono", int(8.0)), justify="left", wraplength=380, anchor=tk.NW, width=50, height=23)
-#terminal_text.place(x=5, y=30)
+terminal_text = tk.Label(window, text='', bg=BG_COLOR_2, fg="white", font=("DejaVu Sans Mono", int(8.0)), justify="left", wraplength=380, anchor=tk.NW, width=50, height=23)
 terminal_text.place(x=33, y=160)
 
-
-know_more = tk.Label(
-    canvas,
-    text="Haz click aquí para ver la documentación.",
-    bg=bg_color_2, fg=bg_color_3,justify="left",
-    cursor="hand2"
-)
-#know_more.place(x=20, y=430)
+# Documentation Link
+know_more = tk.Label(canvas, text="Haz click aquí para ver la documentación.", bg=BG_COLOR_2, fg=BG_COLOR_3, justify="left", cursor="hand2")
 know_more.place(x=20, y=480)
 know_more.bind('<Button-1>', goto_documentation)
 
-
-
 window.resizable(False, False)
+window.mainloop()
