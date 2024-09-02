@@ -100,7 +100,9 @@ def on_encrypt(*args):
         return
     show_rsa_steps()
     processed_message = encrypt(message, public_key)
+    terminal_text.config(text=terminal_text.cget("text") + "Mensaje encriptado:\n" + str(processed_message) + "\n")
     save_to_file(processed_message, filename)
+    terminal_text.config(text=terminal_text.cget("text") + "Mensaje guardado en archivo.\n")
 
 def on_decrypt(*args):
     global processed_message, our_text
