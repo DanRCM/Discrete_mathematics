@@ -4,7 +4,7 @@ from pathlib import Path
 import tkinter as tk
 from tkinter import messagebox, filedialog
 import random as rd
-from PIL import ImageTk, Image
+from PIL import ImageTk, Image, ImageSequence
 from project_algorithm_RSA.key_generation import generate_and_save_keys, load_keys
 from project_algorithm_RSA.decrypt import decrypt
 from project_algorithm_RSA.encrypt import encrypt
@@ -56,12 +56,32 @@ def start_animation():
         entry_processed.insert(0, processed_message)
         index = 0
 
-def animate_dots():
-    global animation_index
-    dots = ["", ".", "..", "..."]
-    terminal_text.config(text="Procesando su mensaje" + dots[animation_index])
-    animation_index = (animation_index + 1) % len(dots)
-    terminalFrame.after(500, animate_dots)  # Adjust the speed of the animation here
+def show_rsa_steps():
+    steps = [
+        "Generando claves públicas y privadas...\n"
+        "Generando números primos p y q...",
+        "Calculando n = p * q...",
+        "Calculando φ(n) = (p-1) * (q-1)...",
+        "Seleccionando e tal que 1 < e < φ(n) y gcd(e, φ(n)) = 1...",
+        "Calculando d tal que d ≡ e^(-1) (mod φ(n))...",
+        "Claves generadas: (e, n) y (d, n)..."
+        "\nA continuación su mensaje encriptado:\n"
+    ]
+    for step in steps:
+        terminal_text.config(text=terminal_text.cget("text") + step + "\n")
+        terminalFrame.update()
+        time.sleep(1)  # Adjust the delay as needed
+
+def show_decryption_steps():
+    steps = [
+        "Leyendo el mensaje cifrado...",
+        "Desencriptando el mensaje con la clave privada...",
+        "Mensaje desencriptado con éxito."
+    ]
+    for step in steps:
+        terminal_text.config(text=terminal_text.cget("text") + step + "\n")
+        terminalFrame.update()
+        time.sleep(1)  # Adjust the delay as needed
 
 def on_encrypt(*args):
     global processed_message, our_text
@@ -78,12 +98,9 @@ def on_encrypt(*args):
     if not selected_folder:
         messagebox.showwarning("Advertencia", "Por favor seleccione una carpeta.")
         return
-    terminal_text.config(text="Generando claves públicas y privadas...\n")
+    show_rsa_steps()
     processed_message = encrypt(message, public_key)
-    terminal_text.config(text=terminal_text.cget("text") + "Mensaje encriptado:\n" + str(processed_message) + "\n")
-    our_text = ["A continuación su mensaje encriptado:\n", "--------------------\n", " _____     \n", "\n", "\n", "\n"]
     save_to_file(processed_message, filename)
-    terminal_text.config(text=terminal_text.cget("text") + "Mensaje guardado en archivo.\n")
 
 def on_decrypt(*args):
     global processed_message, our_text
@@ -96,10 +113,9 @@ def on_decrypt(*args):
         with open(selected_file, 'r') as file:
             ciphertext = int(file.read())
         terminal_text.config(text=terminal_text.cget("text") + "Leyendo archivo encriptado...\n")
+        show_decryption_steps()  # Show decryption steps
         processed_message = decrypt(ciphertext, private_key)
         terminal_text.config(text=terminal_text.cget("text") + "Mensaje desencriptado:\n" + processed_message + "\n")
-        our_text = ["A continuación su mensaje desencriptado:\n", "--------------------\n", " _____     \n", "\n", "\n", "\n"]
-        animate_dots()  # Start the dots animation
     except ValueError:
         messagebox.showerror("Error", "Mensaje cifrado inválido.")
     except Exception as e:
@@ -112,6 +128,7 @@ def on_select(*args):
         on_decrypt()
 
 def button_clicked():
+    terminal_text.config(text="")  # Clear terminal text before each operation
     on_select()
     start_animation()
 
@@ -275,8 +292,34 @@ doc_button_frame = tk.Frame(window, height=50, width=120)
 doc_button_frame.place(x=451 + 315.5 - 60 - 20, y=470)  # Moved 10 px down
 doc_btn = RoundedButton(doc_button_frame, 120, 50, 20, 2, ORANGE_COLOR, WHITE_COLOR, command=goto_documentation)
 doc_btn.place(x=0, y=0)
-doc_button_label = tk.Label(doc_button_frame, text='Documentation', bg=ORANGE_COLOR, fg='white', font='Arial 10 bold')
-doc_button_label.place(x=15, y=15)
+doc_btn_label = tk.Label(doc_button_frame, text='Documentation', bg=ORANGE_COLOR, fg='white', font='Arial 10 bold')
+doc_btn_label.place(x=10, y=15)
 
-# Main Loop
+# Function to update GIF frame
+def update_gif(frame_index):
+    frame = gif_frames[frame_index]
+    gif_label.config(image=frame)
+    frame_index = (frame_index + 1) % len(gif_frames)
+    window.after(100, update_gif, frame_index)  # Adjust the speed
+    # of the animation here
+
+# Load and resize GIF
+gif_path = ASSETS_PATH / "encriptacion.gif"
+gif_image = Image.open(gif_path)
+
+# Resize each frame of the GIF
+new_size = (320, 120)  # Width, Height
+gif_frames = []
+for frame in ImageSequence.Iterator(gif_image):
+    resized_frame = frame.resize(new_size, Image.LANCZOS)
+    gif_frames.append(ImageTk.PhotoImage(resized_frame))
+
+# GIF Label
+gif_label = tk.Label(window, bg=WHITE_COLOR)
+gif_label.place(x=490, y=20)  # Adjust the position as needed
+
+# Start GIF animation
+update_gif(0)
+
+# Start the Tkinter main loop
 window.mainloop()
