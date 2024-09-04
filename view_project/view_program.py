@@ -16,6 +16,7 @@ BG_COLOR_2 = "#0F1014"
 BG_COLOR_3 = "#646464"
 WHITE_COLOR = "#eeeff1"
 WHITE_COLOR_2 = "#FCFDFF"
+GRAY_COLOR = "#999999"
 ORANGE_COLOR = "#f68b00"
 
 # Global Variables
@@ -163,13 +164,11 @@ def update_ui(*args):
         entry_storage.config(state=tk.NORMAL)
         entry_message.delete(0, tk.END)
         entry_storage.delete(0, tk.END)
-        folder_button_label.config(text='Folder/File')
     else:
         entry_message.config(state=tk.DISABLED)
         entry_storage.config(state=tk.DISABLED)
         entry_message.delete(0, tk.END)
         entry_storage.delete(0, tk.END)
-        folder_button_label.config(text='Folder/File')
 
 class RoundedButton(tk.Canvas):
     def __init__(self, parent, width, height, cornerradius, padding, color, bg, command=None):
@@ -216,63 +215,84 @@ def make_label(master, x, y, h, w, *args, **kwargs):
     label.pack(fill=tk.BOTH, expand=1)
     return label
 
+def make_option_menu(parent, value, *values, font, bg_color_1, bg_color_2, fg_color_1):
+    global default
+    default = tk.StringVar(parent)
+    default.set(value)
+    option_menu = tk.OptionMenu(parent, default, value, *values, command=update_ui)
+    option_menu.config(bg=bg_color_2, fg=fg_color_1, font=font, highlightthickness=0, activebackground=bg_color_1, activeforeground=fg_color_1, cursor="hand2", relief="flat")
+    option_menu['menu'].config(bg=bg_color_1, fg=fg_color_1, font=font, activebackground=bg_color_1, activeforeground=fg_color_1, cursor="hand2")
+    option_menu.place(x=490 + 10.5, y=295 + 10)  # Moved 5 px up
+
 # GUI Setup
 window = tk.Tk()
 window.title("Tkinter Designer")
 window.geometry("882x539")  # Increased size by 20 pixels in width and height
 window.configure(bg=WHITE_COLOR)
-canvas = tk.Canvas(window, bg=BG_COLOR_2, height=539, width=882, bd=0, highlightthickness=0, relief="ridge")
+canvas = tk.Canvas(window, bg=WHITE_COLOR, height=539, width=882, bd=0, highlightthickness=0, relief="ridge")
 canvas.place(x=0, y=0)
 canvas.create_rectangle(451, 0, 451 + 431, 0 + 539, fill=WHITE_COLOR, outline="")
 
-# Entry Fields
-def create_rounded_entry(parent, x, y, width, height, text_var, placeholder, font, bg_color, fg_color, border_color):
+## Entry Menu Title
+title1 = tk.Label(window, text="Enter your Message", bg=WHITE_COLOR, fg=BG_COLOR_2, font="Arial-BoldMT 22 bold")
+title1.place(x=490, y=75)
+
+## Entry Fields
+def create_rounded_entry(parent, x, y, width, height, text_var, placeholder, font, bg_color, fg_color, border_color, has_option_menu = False, command=None):
     frame = tk.Frame(parent, bg=border_color, bd=0)
     frame.place(x=x, y=y, width=width, height=height)
-    entry = tk.Entry(frame, textvariable=text_var, bd=0, bg=bg_color, fg=fg_color, font=font, highlightthickness=0)
-    entry.place(x=2, y=2, width=width-4, height=height-4)
+    entry_frame = RoundedSquare(frame, width, height, 10, 0, WHITE_COLOR_2, WHITE_COLOR)
+    entry_frame.place(x=0, y=0)
+    entry_label = tk.Label(entry_frame, text=placeholder, bg=WHITE_COLOR_2, fg=BG_COLOR_1, font=font)
+    entry_label.place(x=12.5, y=8)
+    entry = tk.Entry(frame, textvariable=text_var, bd=0, bg=bg_color, fg=GRAY_COLOR, font="Arial 10", highlightthickness=0)
+    entry.place(x=12.5, y=24.5, width=width-25, height=height-25)
     entry.insert(0, placeholder)
+
+    def on_focus_in(event):
+        if entry.get() == placeholder:
+            entry.delete(0, tk.END)
+            entry.config(fg=BG_COLOR_1)
+
+    def on_focus_out(event):
+        if entry.get() == "":
+            entry.insert(0, placeholder)
+            entry.config(fg=GRAY_COLOR)
+
+    if has_option_menu:
+        make_option_menu(parent, "Encrypted Message ", "Decrypted Message ", font="Arial-BoldMT 10 bold", bg_color_1=WHITE_COLOR, bg_color_2=WHITE_COLOR_2, fg_color_1=BG_COLOR_1)
+        entry.config(fg=BG_COLOR_1)
+        entry.place(x=12.5, y=24.5, width=width-25-34, height=height-25)
+    else:
+        entry.bind("<FocusIn>", on_focus_in)
+        entry.bind("<FocusOut>", on_focus_out)
+
     return entry
 
 message_var = tk.StringVar()
 storage_var = tk.StringVar()
 processed_var = tk.StringVar()
 
-entry_message = create_rounded_entry(window, 490, 137 + 25, 321, 35, message_var, "Message", "Arial 10", WHITE_COLOR_2, BG_COLOR_1, ORANGE_COLOR)
-entry_storage = create_rounded_entry(window, 490, 218 + 25, 321, 35, storage_var, "File name", "Arial 10", WHITE_COLOR_2, BG_COLOR_1, ORANGE_COLOR)
-entry_processed = create_rounded_entry(window, 490, 299 + 30, 321, 35, processed_var, "", "Arial 10", WHITE_COLOR_2, BG_COLOR_1, ORANGE_COLOR)
+entry_message = create_rounded_entry(window, 490, 137.5, 321, 60, message_var, "Message", "Arial-BoldMT 10 bold", WHITE_COLOR_2, BG_COLOR_1, ORANGE_COLOR)
+entry_storage = create_rounded_entry(window, 490, 137.5 + 81, 321, 60, storage_var, "File name", "Arial-BoldMT 10 bold", WHITE_COLOR_2, BG_COLOR_1, ORANGE_COLOR)
+entry_processed = create_rounded_entry(window, 490, 137.5 + 81*2, 321, 60, processed_var, "", "Arial-BoldMT 10 bold", WHITE_COLOR_2, BG_COLOR_1, ORANGE_COLOR, True, select_folder_or_file)
 
 entry_message.focus()
-
-# Labels
-message_text_id = tk.Label(window, text="Message", bg=WHITE_COLOR, fg=BG_COLOR_1, font="Arial-BoldMT 10 bold")
-storage_text_id = tk.Label(window, text="File name", bg=WHITE_COLOR, fg=BG_COLOR_1, font="Arial-BoldMT 10 bold")
-message_text_id.place(x=490, y=137)
-storage_text_id.place(x=490, y=218)
 
 # Folder/File Selection
 folder_label = tk.Label(window, text="No folder selected", bg=WHITE_COLOR, fg=BG_COLOR_1, font="Arial 10")
 folder_label.place(x=490, y=299 + 70)
 
-folder_button_frame = tk.Frame(window, height=50, width=120)
-folder_button_frame.place(x=490, y=299 + 100)  # Moved 20 px to the right
-folder_button = RoundedButton(folder_button_frame, 120, 50, 20, 2, ORANGE_COLOR, WHITE_COLOR, command=select_folder_or_file)
-folder_button.place(x=0, y=0)
-folder_button_label = tk.Label(folder_button_frame, text='Folder/File', bg=ORANGE_COLOR, fg='white', font='Arial 10 bold')
-folder_button_label.place(x=15, y=15)
-folder_button_label.bind("<Button-1>", select_folder_or_file)
-
-# Dropdown Menu
-default = tk.StringVar(window)
-default.set("Encrypted Message ")
-option_menu = tk.OptionMenu(window, default, "Encrypted Message ", "Decrypted Message ", command=update_ui)
-option_menu.config(bg=WHITE_COLOR, fg=BG_COLOR_1, font="Arial 10", highlightthickness=2, highlightbackground=ORANGE_COLOR, activebackground=WHITE_COLOR, activeforeground=BG_COLOR_1)
-option_menu['menu'].config(bg=WHITE_COLOR, fg=BG_COLOR_1)
-option_menu.place(x=490, y=295)  # Moved 5 px up
+original_image = Image.open(ASSETS_PATH / "path_picker_2.png")
+resized_image = original_image.resize((30, 30), Image.LANCZOS)
+path_picker_img = ImageTk.PhotoImage(resized_image)
+path_picker_button = tk.Button(image=path_picker_img, text = '', compound = 'center', bg = WHITE_COLOR_2, borderwidth = 0)
+path_picker_button.config(highlightthickness = 0, command = select_folder_or_file, relief = 'flat', cursor = 'hand2')
+path_picker_button.place(x=765, y=238 + 75)
 
 # Encrypt/Decrypt Button
 encrypt_button_frame = tk.Frame(window, height=50, width=120)
-encrypt_button_frame.place(x=451 + 315.5 - 60 - 20, y=400)  # Align with Documentation button
+encrypt_button_frame.place(x=451 + 215.5 - 60 - 20, y=410)  # Align with Documentation button
 encrypt_button = RoundedButton(encrypt_button_frame, 120, 50, 20, 2, ORANGE_COLOR, WHITE_COLOR, command=button_clicked)
 encrypt_button.place(x=0, y=0)
 encrypt_button_label = tk.Label(encrypt_button_frame, text='D/E', bg=ORANGE_COLOR, fg='white', font='Arial 10 bold')
@@ -280,16 +300,16 @@ encrypt_button_label.place(x=40, y=15)
 encrypt_button_label.bind("<Button-1>", button_clicked)
 
 # Terminal Frame
-terminalFrame = tk.Frame(window, bg=BG_COLOR_2, height=539 - 200, width=451 - 100)
-terminalFrame.place(x=50, y=100)
-terminal_text = tk.Label(terminalFrame, text="", bg=BG_COLOR_2, fg=WHITE_COLOR, font="Arial 10 bold", justify=tk.LEFT, anchor="nw")
-terminal_text.place(x=0, y=0, width=451 - 100, height=539 - 200)
+terminalFrame = RoundedSquare(canvas, 431 + 50, 539, 50, 0, BG_COLOR_2, WHITE_COLOR)
+terminalFrame.place(x=-50, y=0)
+terminal_text = tk.Label(canvas, text="", bg=BG_COLOR_2, fg=WHITE_COLOR, font=("DejaVu Sans Mono", int(8.0)), justify=tk.LEFT, anchor="nw")
+terminal_text.place(x=50, y=170, width=451 - 100, height=539 - 200)
 
 # Titles
 title1 = tk.Label(canvas, text="RSA", bg=BG_COLOR_2, fg=WHITE_COLOR, font="Arial-BoldMT 30 bold")
-title1.place(x=50, y=20)
+title1.place(x=50, y=60)
 title2 = tk.Label(canvas, text="Encryption/Decryption", bg=BG_COLOR_2, fg=WHITE_COLOR, font="Arial-BoldMT 20 bold")
-title2.place(x=50, y=60)
+title2.place(x=50, y=100)
 
 ## Documentation Button
 know_more = tk.Label(
@@ -300,32 +320,6 @@ know_more = tk.Label(
 )
 know_more.place(x=20, y=500)
 know_more.bind('<Button-1>', goto_documentation)
-
-# Function to update GIF frame
-def update_gif(frame_index):
-    frame = gif_frames[frame_index]
-    gif_label.config(image=frame)
-    frame_index = (frame_index + 1) % len(gif_frames)
-    window.after(100, update_gif, frame_index)  # Adjust the speed
-    # of the animation here
-
-# Load and resize GIF
-gif_path = ASSETS_PATH / "encriptacion.gif"
-gif_image = Image.open(gif_path)
-
-# Resize each frame of the GIF
-new_size = (320, 120)  # Width, Height
-gif_frames = []
-for frame in ImageSequence.Iterator(gif_image):
-    resized_frame = frame.resize(new_size, Image.LANCZOS)
-    gif_frames.append(ImageTk.PhotoImage(resized_frame))
-
-# GIF Label
-gif_label = tk.Label(window, bg=WHITE_COLOR)
-gif_label.place(x=490, y=20)  # Adjust the position as needed
-
-# Start GIF animation
-update_gif(0)
 
 # Start the Tkinter main loop
 window.mainloop()
