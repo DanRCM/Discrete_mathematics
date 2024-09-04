@@ -129,7 +129,7 @@ def on_select(*args):
     else:
         on_decrypt()
 
-def button_clicked():
+def button_clicked(*args):
     terminal_text.config(text="")  # Clear terminal text before each operation
     on_select()
     start_animation()
@@ -146,7 +146,7 @@ def load_from_file(filepath):
     with open(filepath, 'r') as file:
         return int(file.read())
 
-def select_folder_or_file():
+def select_folder_or_file(*args):
     global selected_folder, selected_file
     if default.get() == "Encrypted Message ":
         selected_folder = filedialog.askdirectory(title="Seleccionar carpeta")
@@ -260,6 +260,7 @@ folder_button = RoundedButton(folder_button_frame, 120, 50, 20, 2, ORANGE_COLOR,
 folder_button.place(x=0, y=0)
 folder_button_label = tk.Label(folder_button_frame, text='Folder/File', bg=ORANGE_COLOR, fg='white', font='Arial 10 bold')
 folder_button_label.place(x=15, y=15)
+folder_button_label.bind("<Button-1>", select_folder_or_file)
 
 # Dropdown Menu
 default = tk.StringVar(window)
@@ -276,6 +277,7 @@ encrypt_button = RoundedButton(encrypt_button_frame, 120, 50, 20, 2, ORANGE_COLO
 encrypt_button.place(x=0, y=0)
 encrypt_button_label = tk.Label(encrypt_button_frame, text='D/E', bg=ORANGE_COLOR, fg='white', font='Arial 10 bold')
 encrypt_button_label.place(x=40, y=15)
+encrypt_button_label.bind("<Button-1>", button_clicked)
 
 # Terminal Frame
 terminalFrame = tk.Frame(window, bg=BG_COLOR_2, height=539 - 200, width=451 - 100)
@@ -289,13 +291,15 @@ title1.place(x=50, y=20)
 title2 = tk.Label(canvas, text="Encryption/Decryption", bg=BG_COLOR_2, fg=WHITE_COLOR, font="Arial-BoldMT 20 bold")
 title2.place(x=50, y=60)
 
-# Documentation Button
-doc_button_frame = tk.Frame(window, height=50, width=120)
-doc_button_frame.place(x=451 + 315.5 - 60 - 20, y=470)  # Moved 10 px down
-doc_btn = RoundedButton(doc_button_frame, 120, 50, 20, 2, ORANGE_COLOR, WHITE_COLOR, command=goto_documentation)
-doc_btn.place(x=0, y=0)
-doc_btn_label = tk.Label(doc_button_frame, text='Documentation', bg=ORANGE_COLOR, fg='white', font='Arial 10 bold')
-doc_btn_label.place(x=10, y=15)
+## Documentation Button
+know_more = tk.Label(
+    canvas,
+    text="Click here to go to the documentation",
+    bg=BG_COLOR_2, fg=BG_COLOR_3,justify="left",
+    cursor="hand2"
+)
+know_more.place(x=20, y=500)
+know_more.bind('<Button-1>', goto_documentation)
 
 # Function to update GIF frame
 def update_gif(frame_index):
